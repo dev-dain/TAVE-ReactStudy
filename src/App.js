@@ -1,8 +1,86 @@
 import React from 'react';
+import axios from 'axios';
+
+import cs from 'classnames';
+import styles from './App.module.css';
+import styled from 'styled-components'
+// import './App.css';
+import { ReactComponent as Check } from './check.svg';
+
+
+
 
 function getTitle(title) {
   return title;
 }
+
+const StyledContainer = styled.div`
+  height: 100vw;
+  padding: 20px;
+
+  background: #83a4d4;
+  background: linear-gradient(to left, #b6fbff, #83a4d4);
+  color: #171212;
+`;
+
+const StyledHeadlinePrimary = styled.h1`
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: 2px;
+`;
+
+const StyledItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding-bottom: 5px;
+`;
+
+const StyledColumn = styled.span`
+  padding: 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: ${props => props.width};
+
+  a { color: inherit; }
+`;  // 이 때 a는 하위 요소임. StyledColumn 밑의 a
+
+const StyledButton = styled.button`
+  background: transparent;
+  border: 1px solid #171212;
+  padding: 5px;
+  cursor: pointer;
+  transition: all .1s ease-in;
+
+  &:hover {
+    background: #171212;
+    color: #fff;
+  }
+`;  // &는 현재 요소(StyledButton이 렌더링될 요소)를 뜻함 
+
+// styled() 안에 스타일 컴포넌트를 넣어 상속받을 수도 있음
+const StyledButtonSmall = styled(StyledButton)`padding: 5px;`;
+const StyledButtonLarge = styled(StyledButton)`padding: 10px;`;
+const StyledSearchForm = styled.form`
+  padding: 10px 0 20px 0;
+  display: flex;
+  align-items: baseline;
+`;
+
+const StyledLabel = styled.label`
+  border-top: 1px solid #171212;
+  border-left: 1px solid #171212;
+  padding-left: 5px;
+  font-size: 24px;
+`;
+
+const StyledInput = styled.input`
+  border: none;
+  border-bottom: 1px solid #171212;
+  background-color: transparent;
+`;
+
 
 const initialStories = [
   {
@@ -101,6 +179,38 @@ const storiesReducer = (state, action) => {
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
+{/* Search 컴포넌트가 진짜 Search하는 게 아니라서 이름을 바꿈.
+        대신 id와 label로 이게 뭐에 쓰려는 건지를 밝힘 
+        type을 바꿔 쓸 수도 있게 하기 위해 (ex. number, email) type도 넘김 
+
+        인데 '리액트 컴포넌트 구성'에서 type이랑 label을 빼버림
+        label prop을 사용하는 대신 컴포넌트 엘리먼트 태그 사이에 'Search' 텍스트 삽입
+        이것은 InputWithLabel에서 children prop으로 사용 가능 */}
+      {/* button onClick에 있던 handleSearchSubmit을 form에 onSubmit에 넣어버림 */}
+const SearchForm = ({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit
+}) => (  
+  <StyledSearchForm onSubmit={onSearchSubmit}>
+    <InputWithLabel
+      id="search"
+      value={searchTerm}
+      isFocused
+      onInputChange={onSearchInput}
+    >
+      <strong>Search: </strong>
+    </InputWithLabel>
+
+    <StyledButtonLarge
+      type="submit" 
+      disabled={!searchTerm}
+    >
+      Submit
+    </StyledButtonLarge>
+  </StyledSearchForm>
+);
+
 function App() {
   const title = [1, 2, 3, 4, 5];
 
@@ -110,12 +220,15 @@ function App() {
     'search',
     ''
   );
-  const handleSearch = event => setSearchTerm(event.target.value);
 
   // url도 상태로 만들어버림
   const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
   const handleSearchInput = event => setSearchTerm(event.target.value);
-  const handleSearchSubmit = () => setUrl(`${API_ENDPOINT}${searchTerm}`);
+  const handleSearchSubmit = event => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
+    event.preventDefault();
+    // preventDefault가 없다면 /?로 리다이렉트되면서 페이지 전체가 새로고침됨
+  }
 
   // 외부의 initialStories가 stories 상태 초기값이 됨
   // -> '리액트 비동기 데이터' 장에서 빈 배열 사용으로 변경
@@ -139,9 +252,26 @@ function App() {
   // const [isError, setIsError] = React.useState(false);
 
 
+  const handleFetchStories = React.useCallback(async() => {
+    dispatchStories({ type: 'STORIES_FETCH_INIT' });
+
+    try {
+      const result = await axios.get(url);
+      
+      dispatchStories({
+        type: 'STORIES_FETCH_SUCCESS',
+        payload: result.data.hits
+      })
+    } catch {
+      dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
+    }
+  }, [url]);
+
+
   // 종속성 배열이 비었기 때문에 컴포넌트 최초 렌더링 시 1회만 실행
   // getAsyncStories에서 반환받은 프로미스를 처리
   // setStories로 stories 상태를 result 결과로 업데이트
+  /*
   const handleFetchStories = React.useCallback(() => {
     if (!searchTerm) return;  // 검색어 자리가 비었다면 그냥 끝
 
@@ -152,8 +282,9 @@ function App() {
     // 기존 useState에서 쓰던 set 상태 업데이트 함수의
     // 새로운 상태 값은 dispatch 함수 매개변수 객체의 payload로 넣어줌
 
-    fetch(url) //url 상태를 가져와서 검색
-      .then(response => response.json())  // 응답을 JSON으로 변환
+    axios
+      .get(url) //url 상태를 가져와서 검색
+      // .then(response => response.json())  // 응답을 JSON으로 변환
       .then(result => { //변환 후 dispatch 함수 호출, payload로 전달
         dispatchStories({
           type: 'STORIES_FETCH_SUCCESS',
@@ -180,8 +311,10 @@ function App() {
       // 이처럼 payload를 안 줄 수도 있음. 하지만 type은 주어져야 함
       .catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' })
       );
-      */
+      *
   }, [url]);  // 종속성 배열에도 url 넣기
+  */
+
 
   React.useEffect(() => {
     handleFetchStories();
@@ -216,37 +349,20 @@ function App() {
   );
 
   // JSX에서 자바스크립트는 { } 안에 쓸 수 있음
+  {/*<div className={styles.container}>*/}
   return (
-    <div>
-      <h1>
+    <StyledContainer>
+      <StyledHeadlinePrimary>
         Hello {getTitle('React!')} {title}
         {/* 그냥 JS 배열 자체를 넣으면 배열 안의 요소가 다 붙어서 나옴*/}
-      </h1>
-      {/* Search 컴포넌트가 진짜 Search하는 게 아니라서 이름을 바꿈.
-        대신 id와 label로 이게 뭐에 쓰려는 건지를 밝힘 
-        type을 바꿔 쓸 수도 있게 하기 위해 (ex. number, email) type도 넘김 
-
-        인데 '리액트 컴포넌트 구성'에서 type이랑 label을 빼버림
-        label prop을 사용하는 대신 컴포넌트 엘리먼트 태그 사이에 'Search' 텍스트 삽입
-        이것은 InputWithLabel에서 children prop으로 사용 가능 */}
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused // === isFocused={true}
-        onInputChange={handleSearch}
-      >
-        <strong>Search: </strong>
-      </InputWithLabel>
-
-      <button
-        type="button"
-        disabled={!searchTerm}  // searchTerm이 비었다면 disabled true
-        onClick={handleSearchSubmit}
-      >
-        Submit
-      </button>
-
-      <hr />
+      </StyledHeadlinePrimary>
+      
+      {/* 검색창과 버튼 */}
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
 
       {/* 만약 isError가 true라면 <p> Something went wrong...</p> 출력.
         Error가 아니라면 isError가 false라 JSX 내부 값이 {false}기 때문에 그냥 지나감 */}
@@ -259,7 +375,7 @@ function App() {
           list={stories.data} 
           onRemoveItem={handleRemoveStory}/>
       )}
-    </div>
+    </StyledContainer>
     // null  //null을 return하면 오류는 나지 않지만 빈 페이지가 나옴
   );
 }
@@ -300,11 +416,13 @@ function InputWithLabel(props) {
     // 루트 컴포넌트가 2개 이상 있으면 X
     // event.target(input#search).value로 input값 접근 가능    
     <React.Fragment>
-      <label htmlFor={props.id}>{props.children}</label>
+      <StyledLabel htmlFor={props.id}>
+        {props.children}
+      </StyledLabel>
       &nbsp;
       {/* ref가 JSX로 지정한 입력 필드의 ref 속성으로 전달
         엘리먼트 인스턴스는 변경 가능한 current 속성에 할당 */}
-      <input
+      <StyledInput
         ref={inputRef}
         id={props.id}
         type={props.type || 'text'}
@@ -316,6 +434,7 @@ function InputWithLabel(props) {
         //input에 onchange 프로퍼티가 원래 있긴 한데
         //onchange=javascript function 이런 식으로 씀
         onChange={props.onInputChange}
+        className={styles.input}
       // 이렇게 되면 여러 InputWithLabel이 렌더링됐을 때
       // 마지막 InputWithLabel에만 포커스가 주어짐
       // autoFocus //선언형 방법.
@@ -345,23 +464,31 @@ const Item = ({ item, onRemoveItem }) => {
   // (???) bind 사용법
   // 
   return (
-    <div>
-      <span>
+    <StyledItem>
+    {/*<div className="item">*/}
+      {/* {{ }} 이렇게 쓰면 안의 것은 인라인 css 코드*/}
+      {/*<span style={{ width: '40%' }}>*/}
+      <StyledColumn width='40%'>
         <a href={item.url}>{item.title}</a>
-      </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
+      </StyledColumn>
+      <StyledColumn width='30%'>{item.author}</StyledColumn>
+      <StyledColumn width='10%'>{item.num_comments}</StyledColumn>
+      <StyledColumn width='10%'>{item.points}</StyledColumn>
+      <StyledColumn width='10%'>
         {/* 1. bind 사용
         <button type="button" onClick={onRemoveItem.bind(null, item)}> 
         */}
         {/* 2. 화살표 함수로 그냥 묶어주기 */}
-        <button type="button" onClick={() => onRemoveItem(item)}>
-          Dismiss
-        </button>
-      </span>
-    </div>
+        {/* css 컴포넌트도 컴포넌트라서 그냥 type이랑 이런 거 쓸 수 있음
+          결과적으로 렌더링될 HTML 태그가 가진 프로퍼티들이면 괜찮음 */}
+        <StyledButtonSmall 
+          type="button" 
+          onClick={() => onRemoveItem(item)}
+        >
+          <Check height="18px" width="18px" />
+        </StyledButtonSmall>
+      </StyledColumn>
+    </StyledItem>
   )
 };
 

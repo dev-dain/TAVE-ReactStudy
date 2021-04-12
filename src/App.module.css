@@ -1,0 +1,77 @@
+.container {
+  height: 100vw;
+  padding: 20px;
+
+  background: #83a4d4;
+  background: linear-gradient(to left, #b6fbff, #83a4d4);
+
+  color: #171212;
+}
+.headline-primary {
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  padding-bottom: 5px;
+}
+.item > span {
+  padding: 0 5px; /* 2개일 때는 앞이 vertical, 뒤가 horizontal 방향 */
+  /* 
+    공백이 여러 개라도 1개만 표시.
+    normal과 다른 점은 nowrap은 텍스트가 길어도 줄바꿈이 안 된다는 점
+  */
+  white-space: nowrap;  
+  /*
+    overflow는 요소 내 콘텐츠가 너무 클 경우 어떻게 보여줄지 결정
+    hidden은 넘치는 부분을 잘라서 보이지 않음    
+  */
+  overflow: hidden;
+  /*
+    text-overflow는 요소 내 텍스트 내용이 넘칠 때 어떻게 처리할지 결정
+    단, overflow가 hidden, scroll, auto && white-space: nowrap이어야 적용됨
+    ellipsis의 경우 잘린 텍스트를 '...'로 표시
+  */
+  text-overflow: ellipsis;
+}
+.item > span > a { color: inherit; }
+
+.button {
+  background: transparent;  /* 투명 */
+  border: 1px solid #171212;
+  padding: 5px;
+  cursor: pointer;
+  /* transition 없으면 hover 없을 때랑 너무 비교됨*/
+  transition: all .1s ease-in;
+}
+.button:hover {
+  background: #171212;
+  color: #fff;
+  fill: #fff; /* fill 없으면 외곽이 하얗게 채워지지 않음 */
+  /* stroke: #fff; */
+}
+.buttonSmall { padding: 5px; }
+.buttonLarge { padding: 10px; }
+
+.searchForm {
+  padding: 10px 0 20px 0;
+  display: flex;
+  align-items: baseline;
+}
+
+.label {
+  border-top: 1px solid #171212;
+  border-left: 1px solid #171212;
+  padding-left: 5px;
+  font-size: 24px;
+}
+
+.input {
+  border: none;
+  border-bottom: 1px solid #171212;
+  background-color: transparent;
+  font-size: 24px;
+}
