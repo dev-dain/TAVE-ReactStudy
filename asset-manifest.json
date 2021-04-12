@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/TAVE-ReactStudy/static/css/main.fc3b06fe.chunk.css",
+    "main.js": "/TAVE-ReactStudy/static/js/main.658bf4de.chunk.js",
+    "main.js.map": "/TAVE-ReactStudy/static/js/main.658bf4de.chunk.js.map",
+    "runtime-main.js": "/TAVE-ReactStudy/static/js/runtime-main.ec583fe6.js",
+    "runtime-main.js.map": "/TAVE-ReactStudy/static/js/runtime-main.ec583fe6.js.map",
+    "static/js/2.633594ff.chunk.js": "/TAVE-ReactStudy/static/js/2.633594ff.chunk.js",
+    "static/js/2.633594ff.chunk.js.map": "/TAVE-ReactStudy/static/js/2.633594ff.chunk.js.map",
+    "static/js/3.ad6983b9.chunk.js": "/TAVE-ReactStudy/static/js/3.ad6983b9.chunk.js",
+    "static/js/3.ad6983b9.chunk.js.map": "/TAVE-ReactStudy/static/js/3.ad6983b9.chunk.js.map",
+    "index.html": "/TAVE-ReactStudy/index.html",
+    "static/css/main.fc3b06fe.chunk.css.map": "/TAVE-ReactStudy/static/css/main.fc3b06fe.chunk.css.map",
+    "static/js/2.633594ff.chunk.js.LICENSE.txt": "/TAVE-ReactStudy/static/js/2.633594ff.chunk.js.LICENSE.txt",
+    "static/media/check.e7cb0596.svg": "/TAVE-ReactStudy/static/media/check.e7cb0596.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.ec583fe6.js",
+    "static/js/2.633594ff.chunk.js",
+    "static/css/main.fc3b06fe.chunk.css",
+    "static/js/main.658bf4de.chunk.js"
+  ]
+}
