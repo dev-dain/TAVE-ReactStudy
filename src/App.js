@@ -344,10 +344,7 @@ function App() {
   // 그건 includes 내에서 searchTerm을 쓰기 때문에
   // input 내용이 바뀌면 handleSearch 실행 이후 stories.filter가 2번 실행됨. 
   // 왜 2번일까?
-  const searchedStories = stories.data.filter(
-    story => story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  
   // JSX에서 자바스크립트는 { } 안에 쓸 수 있음
   {/*<div className={styles.container}>*/}
   return (
